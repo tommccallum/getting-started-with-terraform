@@ -19,23 +19,27 @@ Why use Terraform?  To automate creating infrastructure on a Cloud provider.  Te
 
 ## Starting up...
 
-Assuming you have modified the .env.template and copied it to .env.
+Copy the .env.template to .env in the root directory of the system.  There is no need to do this for subdirectories as the build.sh script will do this for you.
 
-Source the environment variables so they are read into the current environment.
+In the root directory of the repository run the build script which merges the environment variables in with the *.tf.template files in each subdirectory.  This is a custom script to overcome a limited with terraform blocks.
 
 ```
-source .env
-env | grep -i TF_VAR
+./build.sh
 ```
 
 Initialise your terraform environment, use this command whenever you edit your terraform files.
 
 ```
+cd iac_demo_1
 terraform init
 ```
 
+If succesful, type:
 
-
+```
+terraform plan
+terraform apply
+```
 
 ## Tips
 
