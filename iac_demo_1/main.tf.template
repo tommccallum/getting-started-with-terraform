@@ -1,0 +1,33 @@
+# this is where we start to create our terraforming
+# we refer to modules here
+
+data "ibm_resource_group" "cos_group" {
+  name = var.shared_resource_group
+}
+
+data "ibm_resource_instance" "cos_instance" {
+    name              = var.shared_cos_instance
+    resource_group_id = data.ibm_resource_group.cos_group.id
+    service           = "cloud-object-storage"
+}
+
+data "ibm_cos_bucket" "terraform-state" {
+  bucket_name          = var.shared_bucket
+  resource_instance_id = data.ibm_resource_instance.cos_instance.id
+  bucket_type          = "single_site_location"
+  bucket_region        = var.region
+}
+
+terraform {
+    backend "s3" {
+        bucket                      = "${TF_VAR_shared_bucket}"
+        key                         = "${TF_VAR_team_name}.tfstate"
+        region                      = "${TF_VAR_region}"
+        skip_region_validation      = true
+        skip_credentials_validation = true
+        skip_metadata_api_check     = true
+        endpoint                    = "${TF_BACKEND_shared_cos_endpoint}"
+        access_key                  = "${TF_BACKEND_shared_cos_access_key}"
+        secret_key                  = "${TF_BACKEND_shared_cos_secret_key}"
+    }
+}
