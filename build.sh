@@ -1,10 +1,31 @@
 #!/bin/bash
 
 # This script allows us to parameterise the terraform blocks which do not normally take variables.
-
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-for template in "$(find ${SCRIPT_DIR} -type f -iname "*\.tf\.template")"
+if [ ! -e "$SCRIPT_DIR/.env" ]; then
+    echo "Could not find .env file for environment variables."
+    exit 1
+fi
+
+if [ "$1" == "--new" ]; then
+    echo "Generating new cloud object storage (cos) bucket prefix"
+    source "${SCRIPT_DIR}/.env"
+    PREFIX=$(tr -dc 0-9 </dev/urandom | head -c 8 ; echo '')
+    BUCKET_NAME=$(echo "${TF_VAR_shared_bucket}" | sed "s/^\d+-//")
+    FULL_BUCKET_NAME="${PREFIX}-${BUCKET_NAME}"
+    echo "Setting TF_VAR_shared_bucket to '${FULL_BUCKET_NAME}'"
+
+    # purge the .env file and then rewrite it
+    cat "${SCRIPT_DIR}/.env" | grep -v "TF_VAR_shared_bucket" > "${SCRIPT_DIR}/.env.tmp"
+    echo "export TF_VAR_shared_bucket=\"${FULL_BUCKET_NAME}\"" >> "${SCRIPT_DIR}/.env.tmp"
+    mv "${SCRIPT_DIR}/.env.tmp" "${SCRIPT_DIR}/.env"
+
+    echo "Reloading environment variables"
+    source "${SCRIPT_DIR}/.env"
+fi
+
+for template in $(find ${SCRIPT_DIR} -type f -iname "*\.tf\.template")
 do
     DIR=$(dirname "$template")
     TEMPLATE_NAME=$(basename "$template")

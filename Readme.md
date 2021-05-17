@@ -50,6 +50,10 @@ terraform apply
 * If you really can't figure out what is going wrong, delete the .terraform directory and rerun ```terraform init```.
 * Remember to use ```data``` blocks to get information about a service and ```resource``` blocks to create new resources.  If you create a resource and want to get information you need both a ```data``` and a ```resource``` block.
 
+## Constraints
+
+Cloud object storage buckets on Cloud Foundry must have a unique name across the whole Cloud Object Storage system.  There is also a delay in cleaning up bucket names.  This means that if you destroy a Cloud Storage bucket you cannot immediately recreate this.  For this reason we use a random number generator to create a prefix that, we hope, will be unique when we start the permanent infrastructure.
+
 ## Recommended Reading
 
 * [O'Reilly's Terraform Up and Running](https://www.amazon.co.uk/Terraform-Running-Writing-Infrastructure-Code/dp/1492046906/ref=asc_df_1492046906/)
